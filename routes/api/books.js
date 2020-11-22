@@ -9,29 +9,20 @@ const connection_param = {
   "password": process.env.DB_PASSWORD
 }
 
+const pool = mysql.createPool(connection_param);
+
 router.get('/', function(req, res, next) {
   const sql = "select * from book order by id";
-  let con;
-  try {
-    con = mysql.createConnection(connection_param);
+
+  pool.getConnection((e, con) => {
     con.query(sql, (e, r, f) => {
       if (e) {
         throw e;
       }
       res.json(r);
     });
-  } catch (error) {
-    console.log(error);
-    con.rollback();
-    return {
-      "status": "error",
-      "error": "fail to fetch data."
-    }
-  } finally {
-    if (con && con.connection) {
-      con.end();
-    }
-  }
+    con.release();
+  });
 });
 
 module.exports = router;
