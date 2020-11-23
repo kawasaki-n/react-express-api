@@ -24,7 +24,7 @@ router.get('/', function(req, res, next) {
       });
     } catch (error) {
       console.log(error);
-      res.send("エラーが発生しました。");
+      res.send("データの取得でエラーが発生しました。");
     } finally {
       if (con) {
         con.release();
@@ -35,21 +35,21 @@ router.get('/', function(req, res, next) {
 
 router.post('/', function(req, res, next) {
   const sql = "insert into book (name, author, url, reg_time, update_time) values(?, ?, ?, now(), now())";
-  const book = {
-    name: req.body.name,
-    author : req.body.author,
-    url: req.body.url
-  }
+  const values = req.body;
   pool.getConnection((e, con) => {
     try {
-      con.query(sql, [book.name, book.author, book.url], (e, r, f) => {
+      con.query(sql, Object.values(values), (e, r) => {
         if (e) {
           throw e;
         }
+        res.json({
+          insertId: r.insertId,
+          message: "Success!"
+        });
       });
     } catch (error) {
       console.log(error);
-      res.send("エラーが発生しました。");
+      res.send("データの登録でエラーが発生しました。");
     } finally {
       con.release();
     }
@@ -65,10 +65,15 @@ router.delete('/:id', function(req, res, next) {
         if (e) {
           throw e;
         }
+        console.log(r);
+        res.json({
+          deleteId: id,
+          message: "Success!"
+        });
       });
     } catch (error) {
       console.log(error);
-      res.send("エラーが発生しました。");
+      res.send("データの削除でエラーが発生しました。");
     } finally {
       con.release();
     }
