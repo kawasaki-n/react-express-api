@@ -25,4 +25,21 @@ router.get('/', function(req, res, next) {
   });
 });
 
+router.post('/', function(req, res, next) {
+  const sql = "insert into book (name, author, url, reg_time, update_time) values(?, ?, ?, now(), now())";
+  const book = {
+    name: req.body.name,
+    author : req.body.author,
+    url: req.body.url
+  }
+  pool.getConnection((e, con) => {
+    con.query(sql, [book.name, book.author, book.url], (e, r, f) => {
+      if (e) {
+        throw e;
+      }
+    });
+    con.release();
+  });
+});
+
 module.exports = router;
