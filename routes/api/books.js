@@ -15,13 +15,21 @@ router.get('/', function(req, res, next) {
   const sql = "select * from book order by id";
 
   pool.getConnection((e, con) => {
-    con.query(sql, (e, r, f) => {
-      if (e) {
-        throw e;
+    try {
+      con.query(sql, (e, r, f) => {
+        if (e) {
+          throw e;
+        }
+        res.json(r);
+      });
+    } catch (error) {
+      console.log(error);
+      res.send("エラーが発生しました。");
+    } finally {
+      if (con) {
+        con.release();
       }
-      res.json(r);
-    });
-    con.release();
+    }
   });
 });
 
@@ -33,12 +41,37 @@ router.post('/', function(req, res, next) {
     url: req.body.url
   }
   pool.getConnection((e, con) => {
-    con.query(sql, [book.name, book.author, book.url], (e, r, f) => {
-      if (e) {
-        throw e;
-      }
-    });
-    con.release();
+    try {
+      con.query(sql, [book.name, book.author, book.url], (e, r, f) => {
+        if (e) {
+          throw e;
+        }
+      });
+    } catch (error) {
+      console.log(error);
+      res.send("エラーが発生しました。");
+    } finally {
+      con.release();
+    }
+  });
+});
+
+router.delete('/:id', function(req, res, next) {
+  const sql = "delete from book where id = ?";
+  var id = req.params.id;
+  pool.getConnection((e, con) => {
+    try {
+      con.query(sql, [id], (e, r, f) => {
+        if (e) {
+          throw e;
+        }
+      });
+    } catch (error) {
+      console.log(error);
+      res.send("エラーが発生しました。");
+    } finally {
+      con.release();
+    }
   });
 });
 
